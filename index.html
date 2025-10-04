@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>IBprofen — Full Demo</title>
+<style>
+  :root{
+    --bg:#05060a;
+    --panel:#0d1116;
+    --muted:#9aa4b2;
+    --accent1:#7c3aed;
+    --accent2:#00d2ff;
+    --glass: rgba(255,255,255,0.03);
+    --card-radius:14px;
+    --success:#22c55e;
+    --danger:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;color:#e6eef8;background:linear-gradient(180deg,var(--bg),#041018)}
+  .app{min-height:100vh;display:flex;flex-direction:column}
+  header{padding:18px 22px;display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white}
+  .logo{display:flex;gap:12px;align-items:center}
+  .logo .icon{width:46px;height:46px;border-radius:10px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;box-shadow:0 8px 40px rgba(124,58,237,0.22)}
+  .logo h1{font-size:18px;margin:0}
+  .spacer{flex:1}
+  nav{display:flex;gap:8px}
+  nav button{background:transparent;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.9);padding:8px 12px;border-radius:10px;cursor:pointer}
+  nav button:hover{transform:translateY(-2px);}
+
+  main{display:grid;grid-template-columns:360px 1fr;gap:18px;padding:18px}
+  .left{position:sticky;top:18px;height:calc(100vh - 36px);overflow:auto;padding-right:6px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:var(--card-radius);box-shadow:0 8px 30px rgba(2,6,23,0.6);border:1px solid var(--glass);margin-bottom:14px}
+  h2{font-size:15px;color:var(--accent2);margin:0 0 8px 0}
+  p.small{font-size:13px;color:var(--muted);margin-bottom:10px}
+
+  label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  input[type="text"], input[type="password"], input[type="number"], select, textarea{
+    width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.02);color:#eef7ff;margin-top:6px;outline:none
+  }
+  button.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#071018;border:none;padding:10px 12px;border-radius:12px;font-weight:700;cursor:pointer;margin-top:10px;box-shadow:0 10px 30px rgba(0,210,255,0.06)}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted);padding:8px 10px;border-radius:10px;cursor:pointer;margin-top:8px}
+  .tiny{font-size:12px;color:var(--muted)}
+  .cred{font-size:12px;color:#bcdcff;margin-top:6px;opacity:0.95}
+
+  .right{min-height:60vh}
+  .welcome{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .panel-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .stat{padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
+  .stat h3{margin:0;font-size:13px;color:var(--accent2)}
+  .stat p{margin:6px 0 0 0;color:var(--muted);font-size:13px}
+
+  .list{margin-top:12px}
+  .list .row{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;margin-bottom:8px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02)}
+  .chip{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);color:var(--muted);font-size:13px}
+
+  .form-inline{display:flex;gap:8px}
+  .form-inline input{flex:1}
+
+  footer{padding:12px 18px;color:var(--muted);text-align:center;margin-top:14px}
+
+  .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(2,6,23,0.7);display:flex;align-items:center;justify-content:center;z-index:999}
+  .modal .box{width:760px;max-width:94%;padding:18px;border-radius:12px;background:linear-gradient(180deg,#07101a,#0b1218);border:1px solid rgba(255,255,255,0.03)}
+  .row{display:flex;gap:12px;align-items:center}
+  .muted{color:var(--muted)}
+
+  @media (max-width:980px){ main{grid-template-columns:1fr;padding:12px} .left{position:static;height:auto} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="icon">IB</div>
+      <div><h1>IBprofen</h1><div class="tiny muted">Full demo — seeded users visible</div></div>
+    </div>
+    <div class="spacer"></div>
+    <nav>
+      <button id="btnHome">Главная</button>
+      <button id="btnTeam">Команда</button>
+      <button id="btnReset">Сброс demo</button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="left">
+      <div class="card" id="cardAuth">
+        <h2>Вход</h2>
+        <p class="small">Логин + пароль → затем можно установить 4-значный PIN для быстрого входа (опция).</p>
+        <label>Логин</label><input id="inpLogin" type="text" placeholder="username"/>
+        <label>Пароль</label><input id="inpPass" type="password" placeholder="password"/>
+        <button class="primary" id="btnLogin">Войти</button>
+        <div style="display:flex;gap:8px">
+          <button class="ghost" id="btnRegister">Регистрация пациента</button>
+          <button class="ghost" id="btnPin">Быстрый PIN</button>
+        </div>
+        <p class="tiny" style="margin-top:8px">Данные на стенде видны прямо в UI — логин/пароль отображаются в списках.</p>
+      </div>
+
+      <div class="card" id="cardRegister" style="display:none">
+        <h2>Регистрация пациента</h2>
+        <label>ФИО</label><input id="regName" />
+        <label>Возраст</label><input id="regAge" type="number" />
+        <label>Пароль</label><input id="regPass" type="password" />
+        <button class="primary" id="btnCreate">Создать пациента</button>
+        <button class="ghost" id="btnCancel">Отмена</button>
+      </div>
+
+      <div class="card" id="cardPinPanel" style="display:none">
+        <h2>Быстрый вход (PIN)</h2>
+        <label>PIN</label><input id="inpPin" maxlength="6" />
+        <button class="primary" id="btnPinLogin">Войти по PIN</button>
+        <button class="ghost" id="btnPinBack">Назад</button>
+      </div>
+
+      <div class="card" id="adminTools" style="display:none">
+        <h2>Админ-утилиты</h2>
+        <p class="small">Добавить врача / управлять данными.</p>
+        <label>Добавить врача - логин</label><input id="admDocLogin" placeholder="login"/>
+        <label>Пароль врача</label><input id="admDocPass" placeholder="password"/>
+        <button class="primary" id="admAddDoc">Добавить врача</button>
+      </div>
+
+      <div class="card">
+        <h2>Инфо</h2>
+        <p class="small">Демо-режим: данные сохраняются в localStorage. Сброс восстановит сиды.</p>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="welcome">
+        <div>
+          <div id="title"><h2 style="margin:0">IBprofen — Demo</h2></div>
+          <div class="tiny muted" id="subtitle">Войдите, чтобы получить доступ</div>
+        </div>
+        <div id="userPanel" class="card" style="display:none;min-width:220px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><div id="uRole" class="tiny muted">role</div><div id="uName" style="font-weight:700"></div></div>
+            <div><div class="tiny muted">Баланс <span id="uBal">0</span> KZT</div><button class="ghost" id="btnLogout">Выйти</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="home" class="card">
+        <h3>Обзор</h3>
+        <p class="small">Готово к демонстрации. Предустановленные аккаунты и креды показаны в UI.</p>
+        <div class="panel-grid" style="margin-top:10px">
+          <div class="stat"><h3>Пациенты</h3><p id="statP" class="tiny muted">—</p></div>
+          <div class="stat"><h3>Врачи</h3><p id="statD" class="tiny muted">—</p></div>
+          <div class="stat"><h3>Записи</h3><p id="statA" class="tiny muted">—</p></div>
+        </div>
+      </div>
+
+      <!-- patient view -->
+      <div id="patientView" style="display:none">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <h3 id="pName">Пациент</h3>
+              <div class="tiny muted" id="pLogin">login</div>
+              <div id="pCred" class="cred"></div>
+            </div>
+            <div class="tiny muted">Бонусы: <b id="pBonus">0</b> &nbsp; Штрафы: <b id="pFines">0</b></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4 class="tiny muted">Быстрая запись</h4>
+            <div class="form-inline" style="margin-top:8px">
+              <input id="pReason" placeholder="Причина / симптомы"/>
+              <select id="pDocSel"></select>
+              <input id="pWhen" type="datetime-local" />
+              <button class="primary" id="pBook">Записаться</button>
+            </div>
+            <div id="pAppts" class="list"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>История здоровья</h4>
+          <div id="pCards" class="list"></div>
+          <p class="tiny muted" style="margin-top:8px">Статус: <span id="pStatus">—</span></p>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>Счёт и бонусы</h4>
+          <p class="tiny muted">Баланс: <b id="pBalance">0</b> KZT</p>
+          <div style="display:flex;gap:8px">
+            <input id="topupAmt" type="number" placeholder="Сумма" />
+            <button class="primary" id="topupBtn">Пополнить</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- doctor view -->
+      <div id="doctorView" style="display:none">
+        <div class="card">
+          <h3>Пациенты</h3>
+          <div id="docList" class="list"></div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <h3>Мои записи</h3>
+          <div id="docAppts" class="list"></div>
+        </div>
+      </div>
+
+      <!-- admin view -->
+      <div id="adminView" style="display:none">
+        <div class="card">
+          <h3>Управление</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="primary" id="adminSeed">Seed demo</button>
+            <button class="ghost" id="adminClear">Clear DB</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Все пациенты</h3>
+          <div id="allPatients" class="list"></div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Все врачи</h3>
+          <div id="allDoctors" class="list"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>© 2025 IBprofen — Full Demo</footer>
+</div>
+
+<div id="modalRoot" style="display:none"></div>
+
+<script>
+/* ===========================
+   Full demo DB — seeded users
+   =========================== */
+const LS = 'ibp_full_demo_v1';
+function uid(pref='id'){ return pref + '_' + Math.random().toString(36).slice(2,9); }
+function now(){ return new Date().toISOString(); }
+function load(){ try{ return JSON.parse(localStorage.getItem(LS)) || null } catch(e){ return null } }
+function save(db){ localStorage.setItem(LS, JSON.stringify(db)); }
+
+const initial = {
+  users: [
+    // doctors (as requested)
+    { id:'d_Amir557', login:'Amir557', pass:'AmirPass1', role:'doctor', name:'Dr. Amir' },
+    { id:'d_Adlet990', login:'Adlet990', pass:'AdletPass1', role:'doctor', name:'Dr. Adlet' },
+    // admin
+    { id:'a_Jony707', login:'Jony707', pass:'adminJony1', role:'admin', name:'Jony (Admin)' }
+  ],
+  patients: [
+    // five patients — credentials visible in UI
+    { id:'p_Alikhan_N_198', login:'Alikhan_N_198', pass:'pA1', name:'Alikhan N.', age:29, balance:1000, bonus:5, fines:0, status:'—', pin:null },
+    { id:'p_ALIKH_T1', login:'ALIKH_T1', pass:'pA2', name:'ALIKH T.', age:34, balance:500, bonus:2, fines:0, status:'under specialist observation (mental health follow-up)', pin:null },
+    { id:'p_Imran_N_567', login:'Imran_N_567', pass:'pA3', name:'Imran N.', age:27, balance:300, bonus:1, fines:0, status:'—', pin:null },
+    { id:'p_ImranTT', login:'ImranTT', pass:'pA4', name:'Imran TT', age:31, balance:200, bonus:0, fines:0, status:'—', pin:null },
+    { id:'p_Nurik_A_475', login:'Nurik_A_475', pass:'pA5', name:'Nurik A.', age:22, balance:0, bonus:0, fines:0, status:'—', pin:null }
+  ],
+  appointments: [
+    { id: uid('a'), patientId:'p_Alikhan_N_198', doctorId:'d_Amir557', when: new Date(Date.now()+3600*1000).toISOString(), reason:'Routine check', status:'scheduled', created: now() }
+  ],
+  cards: [
+    { id: uid('c'), patientId:'p_Alikhan_N_198', createdBy:'d_Amir557', createdByName:'Dr. Amir', note:'Annual check: all OK', diagnosis:'—', createdAt: now() }
+  ]
+};
+
+let DB = load() || JSON.parse(JSON.stringify(initial));
+save(DB);
+
+/* ===========================
+   Small helpers + bindings
+   =========================== */
+const $ = s => document.querySelector(s);
+function updateStats(){ $('#statP').textContent = DB.patients.length; $('#statD').textContent = DB.users.filter(u=>u.role==='doctor').length; $('#statA').textContent = DB.appointments.length; save(DB); }
+let SESSION = null;
+
+/* AUTH */
+$('#btnLogin').addEventListener('click', ()=> {
+  const login = $('#inpLogin').value.trim();
+  const pass = $('#inpPass').value;
+  if(!login || !pass) return alert('Введите логин и пароль');
+  const u = DB.users.find(x=>x.login===login) || DB.patients.find(x=>x.login===login);
+  if(!u) return alert('Пользователь не найден');
+  if(u.pass !== pass) return alert('Неверный пароль');
+  SESSION = { id: u.id, role: u.role || 'patient', login: u.login, name: u.name || u.login };
+  $('#inpLogin').value=''; $('#inpPass').value='';
+  if(!u.pin){
+    const setp = confirm('Установить 4-значный PIN для быстрого входа?');
+    if(setp){
+      const p = prompt('Введите 4 цифры PIN:');
+      if(p && /^\d{4}$/.test(p)){ u.pin = p; save(DB); alert('PIN установлен'); }
+      else alert('PIN не установлен (требуются 4 цифры)');
+    }
+  }
+  renderSession();
+});
+
+/* PIN UI */
+$('#btnPin').addEventListener('click', ()=> { $('#cardAuth').style.display='none'; $('#cardRegister').style.display='none'; $('#cardPinPanel').style.display='block'; });
+$('#btnPinBack').addEventListener('click', ()=> { $('#cardPinPanel').style.display='none'; $('#cardAuth').style.display='block'; });
+$('#btnPinLogin').addEventListener('click', ()=> {
+  const pin = $('#inpPin').value.trim();
+  if(!pin) return alert('Введите PIN');
+  const u = DB.users.concat(DB.patients).find(x=>x.pin === pin);
+  if(!u) return alert('PIN не найден');
+  SESSION = { id:u.id, role:u.role||'patient', login:u.login, name: u.name || u.login };
+  $('#inpPin').value=''; renderSession();
+});
+
+/* Register patient */
+$('#btnRegister').addEventListener('click', ()=> { $('#cardAuth').style.display='none'; $('#cardRegister').style.display='block'; });
+$('#btnCancel').addEventListener('click', ()=> { $('#cardRegister').style.display='none'; $('#cardAuth').style.display='block'; });
+$('#btnCreate').addEventListener('click', ()=> {
+  const name = $('#regName').value.trim(); const age = Number($('#regAge').value) || 0; const pass = $('#regPass').value.trim();
+  if(!name || !pass) return alert('Введите имя и пароль');
+  const idx = DB.patients.length + 1; const login = 'patient' + idx; const id = 'p_' + Math.random().toString(36).slice(2,9);
+  DB.patients.push({ id, login, pass, role:'patient', name, age, balance:0, bonus:0, fines:0, status:'—', pin:null });
+  save(DB); updateStats(); alert('Пациент создан. Логин: '+login+' Пароль: '+pass);
+  $('#regName').value=''; $('#regAge').value=''; $('#regPass').value=''; $('#cardRegister').style.display='none'; $('#cardAuth').style.display='block';
+});
+
+/* Logout */
+$('#btnLogout').addEventListener('click', ()=> { SESSION = null; renderSession(); });
+
+/* Admin actions */
+$('#admAddDoc').addEventListener('click', ()=> {
+  const l = $('#admDocLogin').value.trim(); const p = $('#admDocPass').value.trim();
+  if(!l || !p) return alert('Введите логин и пароль врача');
+  const id = 'd_' + Math.random().toString(36).slice(2,8);
+  DB.users.push({ id, login:l, pass:p, role:'doctor', name:'Dr. ' + l }); save(DB); updateStats(); alert('Врач добавлен: '+l);
+  $('#admDocLogin').value=''; $('#admDocPass').value='';
+});
+$('#adminSeed').addEventListener('click', ()=> { DB = JSON.parse(JSON.stringify(initial)); save(DB); updateStats(); renderSession(); alert('Seed restored'); });
+$('#adminClear').addEventListener('click', ()=> { if(confirm('Очистить demo и восстановить seed?')){ localStorage.removeItem(LS); DB = JSON.parse(JSON.stringify(initial)); save(DB); updateStats(); renderSession(); alert('Cleared & seeded'); }});
+$('#btnReset').addEventListener('click', ()=> { if(confirm('Восстановить demo?')){ DB = JSON.parse(JSON.stringify(initial)); save(DB); updateStats(); renderSession(); alert('Seed restored'); }});
+
+/* Team modal */
+$('#btnTeam').addEventListener('click', ()=> {
+  openModal('Команда', `<div class="card"><h3>Project Captain</h3><p class="tiny muted">Руководит проектом</p></div>
+    <div style="height:8px"></div><div class="card"><h3>System Architect</h3><p class="tiny muted">Проектирует базу</p></div>
+    <div style="height:8px"></div><div class="card"><h3>Frontend Dev</h3><p class="tiny muted">UI / UX</p></div>`);
+});
+function openModal(title, html){
+  const root = $('#modalRoot'); root.innerHTML = `<div class="modal"><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h3>${title}</h3><button id="m_close" class="ghost">✕</button></div><div style="margin-top:10px">${html}</div></div></div>`; root.style.display='block';
+  document.getElementById('m_close').addEventListener('click', ()=> { root.style.display='none'; root.innerHTML=''; });
+}
+
+/* Render views by role */
+function renderSession(){
+  updateStats();
+  $('#cardAuth').style.display = SESSION ? 'none' : 'block';
+  $('#cardRegister').style.display = 'none';
+  $('#cardPinPanel').style.display = 'none';
+  $('#adminTools').style.display = 'none';
+  if(!SESSION){ $('#userPanel').style.display='none'; $('#subtitle').textContent = 'Войдите, чтобы получить доступ'; showOnly('home'); return; }
+  const user = DB.users.concat(DB.patients).find(u=>u.id===SESSION.id);
+  $('#userPanel').style.display='block'; $('#uRole').textContent = (SESSION.role || 'patient').toUpperCase(); $('#uName').textContent = user.name || SESSION.login; $('#uBal').textContent = user.balance || 0;
+  if(SESSION.role === 'patient') showPatient(SESSION.id);
+  else if(SESSION.role === 'doctor') showDoctor(SESSION.id);
+  else if(SESSION.role === 'admin'){ $('#adminTools').style.display='block'; showAdmin(); }
+}
+
+function showOnly(view){
+  $('#home').style.display = view==='home' ? 'block' : 'none';
+  $('#patientView').style.display = view==='patient' ? 'block' : 'none';
+  $('#doctorView').style.display = view==='doctor' ? 'block' : 'none';
+  $('#adminView').style.display = view==='admin' ? 'block' : 'none';
+}
+
+/* PATIENT */
+function showPatient(pid){
+  showOnly('patient'); const p = DB.patients.find(x=>x.id===pid); if(!p) return;
+  $('#pName').textContent = p.name; $('#pLogin').textContent = p.login; $('#pCred').textContent = `login: ${p.login} / pass: ${p.pass}`; $('#pBonus').textContent = p.bonus||0; $('#pFines').textContent = p.fines||0; $('#pBalance').textContent = p.balance||0; $('#pStatus').textContent = p.status||'—';
+  const sel = $('#pDocSel'); sel.innerHTML = ''; DB.users.filter(u=>u.role==='doctor').forEach(d=>{ const opt=document.createElement('option'); opt.value=d.id; opt.textContent=d.name+' ('+d.login+')'; sel.appendChild(opt); });
+  renderPatientAppts(pid); renderPatientCards(pid);
+  $('#pBook').onclick = ()=> {
+    const reason = $('#pReason').value.trim(), doc = $('#pDocSel').value, when = $('#pWhen').value;
+    if(!reason || !doc || !when) return alert('Заполните причину, врача и время');
+    const ap = { id: uid('a'), patientId: pid, doctorId: doc, when: new Date(when).toISOString(), reason, status:'scheduled', created: now() };
+    DB.appointments.push(ap); save(DB); updateStats(); $('#pReason').value=''; $('#pWhen').value=''; renderPatientAppts(pid); alert('Запись создана');
+  };
+  $('#topupBtn').onclick = ()=> { const amt = Number($('#topupAmt').value) || 0; if(amt<=0) return alert('Введите сумму'); p.balance = (p.balance||0) + amt; save(DB); renderSession(); $('#topupAmt').value=''; alert('Счёт пополнен'); };
+}
+function renderPatientAppts(pid){
+  const list = $('#pAppts'); list.innerHTML = '<h4 class="tiny muted">Мои записи</h4>';
+  const appts = DB.appointments.filter(a=>a.patientId===pid).sort((a,b)=> new Date(a.when)-new Date(b.when));
+  if(!appts.length){ list.innerHTML += '<div class="tiny muted">Нет записей</div>'; return; }
+  appts.forEach(a=>{
+    const doc = DB.users.find(u=>u.id===a.doctorId);
+    const div = document.createElement('div'); div.className='row';
+    div.innerHTML = `<div><b>${doc?.name||'Доктор'}</b><div class="muted tiny">${new Date(a.when).toLocaleString()} • ${a.reason}</div></div>
+      <div class="center"><div class="chip">${a.status}</div>${a.status==='scheduled' ? '<button class="ghost" data-id="'+a.id+'">Отменить</button>' : ''}</div>`;
+    list.appendChild(div);
+    const btn = div.querySelector('button');
+    if(btn) btn.addEventListener('click', ()=> {
+      if(!confirm('Отменить запись?')) return;
+      a.status='missed'; save(DB);
+      const pat = DB.patients.find(p=>p.id===pid); pat.fines = (pat.fines||0) + 100; save(DB);
+      renderPatientAppts(pid); renderSession(); alert('Запись отменена. Штраф 100 KZT добавлен (демo).');
+    });
+  });
+}
+function renderPatientCards(pid){
+  const cont = $('#pCards'); cont.innerHTML = '<h4 class="tiny muted">Мед. записи</h4>';
+  const cards = DB.cards.filter(c=>c.patientId===pid).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+  if(!cards.length) cont.innerHTML += '<div class="tiny muted">Нет записей</div>';
+  cards.forEach(c=>{ const div=document.createElement('div'); div.className='row'; div.innerHTML = `<div><b>${c.diagnosis||'Запись'}</b><div class="muted tiny">${new Date(c.createdAt).toLocaleString()} • ${c.createdByName||'—'}</div><div class="tiny muted">${c.note}</div></div>`; cont.appendChild(div); });
+}
+
+/* DOCTOR */
+function showDoctor(did){
+  showOnly('doctor'); $('#docList').innerHTML=''; DB.patients.forEach(p=>{ const row=document.createElement('div'); row.className='row'; row.innerHTML = `<div><b>${p.name}</b><div class="tiny muted">${p.login}</div><div class="cred">login: ${p.login} / pass: ${p.pass}</div></div><div><button class="ghost" data-id="${p.id}">Открыть</button></div>`; $('#docList').appendChild(row); row.querySelector('button').addEventListener('click', ()=> openPatientModal(p.id)); });
+  const appts = DB.appointments.filter(a=>a.doctorId===did).sort((a,b)=> new Date(a.when)-new Date(b.when));
+  $('#docAppts').innerHTML = ''; if(!appts.length) $('#docAppts').innerHTML = '<div class="tiny muted">Нет записей</div>';
+  appts.forEach(a=>{ const p = DB.patients.find(x=>x.id===a.patientId); const row=document.createElement('div'); row.className='row'; row.innerHTML = `<div><b>${p?.name||'Пациент'}</b><div class="muted tiny">${new Date(a.when).toLocaleString()} • ${a.reason}</div></div><div class="center"><div class="chip">${a.status}</div>${a.status==='scheduled' ? '<button class="primary" data-id="'+a.id+'">Пришел</button>' : ''}</div>`; $('#docAppts').appendChild(row); const btn = row.querySelector('button.primary'); if(btn) btn.addEventListener('click', ()=> { if(!confirm('Отметить как пришедшего?')) return; a.status='done'; const pat = DB.patients.find(x=>x.id===a.patientId); pat.bonus = (pat.bonus||0) + 5; DB.cards.push({ id: uid('c'), patientId: a.patientId, createdBy: did, createdByName: DB.users.find(u=>u.id===did)?.name || 'Doctor', note:'Visit: ' + a.reason, diagnosis:'Consult', createdAt: now() }); save(DB); updateStats(); renderSession(); alert('Отметил. Бонус +5. Мед. запись добавлена.'); showDoctor(did); }); });
+}
+
+/* ADMIN */
+function showAdmin(){
+  showOnly('admin'); $('#allPatients').innerHTML=''; DB.patients.forEach(p=>{ const row=document.createElement('div'); row.className='row'; row.innerHTML = `<div><b>${p.name}</b><div class="tiny muted">${p.login}</div><div class="cred">login: ${p.login} / pass: ${p.pass}</div></div><div class="center"><div class="chip">Баланс ${p.balance}</div><button class="ghost" data-id="${p.id}">Открыть</button></div>`; $('#allPatients').appendChild(row); row.querySelector('button').addEventListener('click', ()=> openPatientModal(p.id)); }); $('#allDoctors').innerHTML=''; DB.users.filter(u=>u.role==='doctor').forEach(d=>{ const row=document.createElement('div'); row.className='row'; row.innerHTML = `<div><b>${d.name}</b><div class="tiny muted">${d.login}</div><div class="cred">login: ${d.login} / pass: ${d.pass}</div></div><div><div class="chip">DOCTOR</div></div>`; $('#allDoctors').appendChild(row); }); }
+
+/* Patient modal (admin/doctor) */
+function openPatientModal(pid){
+  const p = DB.patients.find(x=>x.id===pid); if(!p) return;
+  const root = $('#modalRoot'); root.style.display='block';
+  root.innerHTML = `<div class="modal"><div class="box"><div style="display:flex;justify-content:space-between;align-items:center"><h3>${p.name}</h3><button id="mclose" class="ghost">✕</button></div><div style="margin-top:8px" class="row"><div style="flex:1"><label>Возраст</label><input id="m_age" value="${p.age}"/></div><div style="width:12px"></div><div style="flex:1"><label>Баланс</label><input id="m_bal" value="${p.balance}"/></div></div><label style="margin-top:8px">Штрафы</label><input id="m_fines" value="${p.fines||0}"/><label style="margin-top:8px">Бонусы</label><input id="m_bonus" value="${p.bonus||0}"/><label style="margin-top:8px">Добавить заметку</label><textarea id="m_note" style="min-height:80px"></textarea><div style="display:flex;gap:8px;margin-top:12px"><button class="primary" id="m_save">Сохранить</button><button class="ghost" id="m_cancel">Закрыть</button></div><div style="margin-top:12px"><h4 class="tiny muted">Мед. записи</h4><div id="m_cards"></div></div><div style="margin-top:12px" class="tiny muted">Credentials: <span class="cred">login: ${p.login} / pass: ${p.pass}</span></div></div></div>`;
+  document.getElementById('mclose').addEventListener('click', ()=> { root.style.display='none'; root.innerHTML=''; });
+  document.getElementById('m_cancel').addEventListener('click', ()=> { root.style.display='none'; root.innerHTML=''; });
+  const cards = DB.cards.filter(c=>c.patientId===pid); const mc = $('#m_cards'); mc.innerHTML=''; if(!cards.length) mc.innerHTML = '<div class="tiny muted">Нет записей</div>'; cards.forEach(c=>{ const div=document.createElement('div'); div.className='row'; div.innerHTML = `<div><b>${c.diagnosis||'Запись'}</b><div class="muted tiny">${new Date(c.createdAt).toLocaleString()} • ${c.createdByName||'—'}</div><div class="tiny muted">${c.note}</div></div>`; mc.appendChild(div); });
+  document.getElementById('m_save').addEventListener('click', ()=> {
+    p.age = Number($('#m_age').value) || p.age; p.balance = Number($('#m_bal').value) || p.balance; p.fines = Number($('#m_fines').value) || 0; p.bonus = Number($('#m_bonus').value) || 0;
+    const note = $('#m_note').value.trim(); if(note) DB.cards.push({ id: uid('c'), patientId: pid, createdBy: SESSION.id, createdByName: SESSION.name, note, diagnosis:'Manual', createdAt: now() });
+    save(DB); updateStats(); renderSession(); alert('Сохранено'); root.style.display='none'; root.innerHTML='';
+  });
+}
+
+/* INIT */
+(function(){
+  if(!load()) save(initial);
+  DB = load();
+  updateStats();
+  renderSession();
+})();
+
+/* Enter key quick submit */
+$('#inpPass').addEventListener('keydown', e=> { if(e.key==='Enter') $('#btnLogin').click(); });
+
+</script>
+</body>
+</html>
